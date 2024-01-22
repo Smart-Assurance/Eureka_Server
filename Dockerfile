@@ -7,7 +7,8 @@ FROM openjdk:17-alpine
  WORKDIR /opt/app
 
  # cp target/{jarfileName}.jar /opt/app/app.jar
- COPY ${JAR_FILE} app.jar
+ COPY target/eureka-server-0.0.1-SNAPSHOT.jar app.jar
+
 
  # java -jar /opt/app/app.jar
  ENTRYPOINT ["java","-jar","app.jar"]
