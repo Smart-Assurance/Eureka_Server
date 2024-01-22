@@ -42,16 +42,17 @@ pipeline {
 stage('reload docker images') {
     steps {
         script {
-            def containers = sh(script: 'docker ps -a -q', returnStdout: true).trim()
+            // Reconnect to SSH
+            sh "ssh -i ${JENKINS_SSH_KEY} -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} 'cd ${REMOTE_PATH}'"
 
+            // Remove existing containers
+            def containers = sh(script: 'docker ps -a -q', returnStdout: true).trim()
             if (containers) {
                 sh "docker rm $containers"
             }
 
-            sh '''
-                cd ${REMOTE_PATH} &&
-                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:$PWD" -w="$PWD" docker/compose:1.25.5 up
-            '''
+            // Run Docker Compose
+            sh "ssh -i ${JENKINS_SSH_KEY} -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} 'cd ${REMOTE_PATH} && docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$PWD:$PWD\" -w=\"$PWD\" docker/compose:1.25.5 up'"
         }
     }
 }
